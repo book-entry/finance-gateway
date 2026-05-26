@@ -1,0 +1,16 @@
+name: CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  cd:
+    uses: your-org/finance-infra/.github/workflows/reusable-cd.yml@main
+    with:
+      java-version: '21'
+      service-name: finance-gateway   # change this per repo
+    secrets:
+      ZEABUR_API_TOKEN: ${{ secrets.ZEABUR_API_TOKEN }}
+      ZEABUR_SERVICE_ID: ${{ secrets.ZEABUR_SERVICE_ID }}   # repo-level secret
+      ZEABUR_PROJECT_ID: ${{ secrets.ZEABUR_PROJECT_ID }}   # org-level secret

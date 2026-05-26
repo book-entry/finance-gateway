@@ -1,0 +1,98 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: finance-gateway
+  cloud:
+    config:
+      enabled: false
+    gateway:
+      grpc:
+        enabled: false
+      routes:
+        # Auth service exposes itself under context-path /authentication (server.servlet.context-path),
+        # so the full path /authentication/v1/login etc. is forwarded as-is. No RemoveRequestHeader here:
+        # /authentication/v1/password/update-request still needs the original Bearer token because the
+        # service revalidates it via FirebaseAuth.verifyIdToken inside PasswordServiceImpl.
+        - id: authentication-service
+          uri: ${AUTHENTICATION_SERVICE_URL}
+          predicates:
+            - Path=/authentication/**
+
+        # Each downstream service exposes itself under its own context-path
+        # (server.servlet.context-path), so the full path is forwarded as-is and
+        # the service strips its own prefix when it reaches the dispatcher.
+        # RemoveRequestHeader=Authorization is belt-and-suspenders — FirebaseAuthFilter
+        # also strips it after validating the token.
+        - id: account-service
+          uri: ${ACCOUNT_SERVICE_URL}
+          predicates:
+            - Path=/account/**
+          filters:
+            - RemoveRequestHeader=Authorization
+
+        - id: transaction-service
+          uri: ${TRANSACTION_SERVICE_URL}
+          predicates:
+            - Path=/transaction/**
+          filters:
+            - RemoveRequestHeader=Authorization
+
+        - id: ingestion-service
+          uri: ${INGESTION_SERVICE_URL}
+          predicates:
+            - Path=/ingestion/**
+          filters:
+            - RemoveRequestHeader=Authorization
+
+  security:
+    user:
+      password: disabled
+
+firebase:
+  # Preferred: mount a service-account JSON file and point to it (e.g. /secrets/firebase.json).
+  service-account-path: ${FIREBASE_SERVICE_ACCOUNT_PATH:}
+  # Legacy: base64-encoded JSON inline (used by the local profile; rotate any key that has been committed).
+  credentials-json: ${FIREBASE_CREDENTIALS_JSON:}
+  project-id: ${FIREBASE_PROJECT_ID:}
+
+finance:
+  gateway:
+    # Ant-style patterns the FirebaseAuthFilter passes through WITHOUT validating a token.
+    # On bypassed paths the Authorization header is forwarded as-is and no X-Internal-Secret
+    # is injected (the downstream service is on its own).
+    public-paths:
+      - /authentication/v1/login/** # pre-token: email/password, OTP request, OAuth exchange
+      - /authentication/v1/register/** # pre-token: registration + verify-otp
+      - /authentication/v1/otp/** # pre-token: OTP resend (token is in body, not header)
+      - /authentication/v1/password/** # mixed: update-request uses Firebase Bearer (revalidated
+        # by the auth service); update/reset-verify/reset use a
+        # short-lived JWT carried in the request body
+    internal:
+      # Shared secret forwarded to downstream services so they can trust X-User-Id.
+      # Generate with: openssl rand -hex 32
+      secret: ${INTERNAL_SERVICE_SECRET:}
+      secret-header: X-Internal-Secret
+      user-id-header: X-User-Id
+      roles-header: X-User-Roles
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    # Our own filters/configs — every request is logged at INFO by RequestLoggingFilter.
+    com.personal.finance.gateway: INFO
+    # Spring Cloud Gateway routing decisions. Flip to DEBUG when chasing 404s
+    # from the gateway itself (no route matched, predicate didn't match, etc.).
+    org.springframework.cloud.gateway: INFO
+    # Reactor-Netty upstream HTTP client. Flip to DEBUG to see the actual URL
+    # the gateway is forwarding to (verifies AUTHENTICATION_SERVICE_URL etc).
+    reactor.netty.http.client: INFO

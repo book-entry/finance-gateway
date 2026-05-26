@@ -1,0 +1,32 @@
+server:
+  port: 0
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  cloud:
+    config:
+      enabled: false
+    gateway:
+      enabled: false      # disable all gateway auto-config in tests — sidesteps gRPC class loading
+      grpc:
+        enabled: false
+      routes: []
+
+firebase:
+  service-account-path: ""
+  credentials-json: ""
+
+finance:
+  gateway:
+    internal:
+      secret: "test-secret-must-be-at-least-32-chars-long-aaaaa"
+      secret-header: X-Internal-Secret
+      user-id-header: X-User-Id
+      roles-header: X-User-Roles
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
