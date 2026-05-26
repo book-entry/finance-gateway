@@ -10,7 +10,7 @@ jobs:
     uses: book-entry/finance-infra/.github/workflows/reusable-cd.yaml@main
     with:
       java-version: "21"
-      service-name: finance-authentication
+      service-name: finance-gateway
     secrets:
       server-username: ${{ secrets.PACKAGE_USER }}
       server-password: ${{ secrets.PACKAGES_TOKEN }}
