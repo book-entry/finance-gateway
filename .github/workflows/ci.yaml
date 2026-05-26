@@ -1,11 +1,13 @@
 name: CI
-
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   ci:
-    uses: your-org/finance-infra/.github/workflows/reusable-ci.yml@main
+    uses: book-entry/finance-infra/.github/workflows/reusable-ci.yaml@main
     with:
-      java-version: '21'
+      java-version: "21"
+    secrets:
+      server-username: ${{ secrets.PACKAGE_USER }}
+      server-password: ${{ secrets.PACKAGES_TOKEN }}
