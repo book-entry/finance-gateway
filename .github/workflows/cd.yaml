@@ -1,16 +1,19 @@
 name: CD
-
 on:
   push:
-    branches: [ main ]
-
+    branches: [main]
 jobs:
   cd:
-    uses: your-org/finance-infra/.github/workflows/reusable-cd.yml@main
+    permissions:
+      contents: read
+      packages: write
+    uses: book-entry/finance-infra/.github/workflows/reusable-cd.yaml@main
     with:
-      java-version: '21'
-      service-name: finance-gateway   # change this per repo
+      java-version: "21"
+      service-name: finance-authentication
     secrets:
+      server-username: ${{ secrets.PACKAGE_USER }}
+      server-password: ${{ secrets.PACKAGES_TOKEN }}
       ZEABUR_API_TOKEN: ${{ secrets.ZEABUR_API_TOKEN }}
-      ZEABUR_SERVICE_ID: ${{ secrets.ZEABUR_SERVICE_ID }}   # repo-level secret
-      ZEABUR_PROJECT_ID: ${{ secrets.ZEABUR_PROJECT_ID }}   # org-level secret
+      ZEABUR_SERVICE_ID: ${{ secrets.ZEABUR_SERVICE_ID }}
+      ZEABUR_ENVIRONMENT_ID: ${{ secrets.ZEABUR_ENVIRONMENT_ID }}
