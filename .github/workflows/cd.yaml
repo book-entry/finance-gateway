@@ -16,4 +16,4 @@ jobs:
       server-password: ${{ secrets.PACKAGES_TOKEN }}
       ZEABUR_API_TOKEN: ${{ secrets.ZEABUR_API_TOKEN }}
       ZEABUR_SERVICE_ID: ${{ secrets.ZEABUR_SERVICE_ID }}
-      ZEABUR_ENVIRONMENT_ID: ${{ secrets.ZEABUR_ENVIRONMENT_ID }}
+      ZEABUR_ENVIRONMENT_ID: ${{ secrets.ZEABUR_ENV_ID }}
