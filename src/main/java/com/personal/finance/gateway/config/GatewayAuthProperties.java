@@ -14,9 +14,8 @@ import java.util.List;
  * <ul>
  *   <li>The filter never inspects the Authorization header. A pre-token endpoint (e.g.
  *       {@code /authentication/v1/login}) is reached even with no Authorization at all.</li>
- *   <li>The Authorization header is <b>not stripped</b>. Downstream endpoints that do their own
- *       Bearer validation (e.g. {@code /authentication/v1/password/update-request}, which calls
- *       {@code FirebaseAuth.verifyIdToken} inside the service) still see the original token.</li>
+ *   <li>The Authorization header is <b>not stripped</b>; the OAuth login exchange does not need
+ *       it, but a bypassed path that did its own Bearer validation would still see the token.</li>
  *   <li>{@code X-Internal-Secret} / {@code X-User-Id} / {@code X-User-Roles} are <b>not injected</b>.
  *       The receiving service must not assume gateway-trusted identity on these paths.</li>
  * </ul>
@@ -28,9 +27,6 @@ import java.util.List;
  *     public-paths:
  *       - /actuator/health
  *       - /authentication/v1/login/**
- *       - /authentication/v1/register/**
- *       - /authentication/v1/otp/**
- *       - /authentication/v1/password/**
  * </pre>
  *
  * <p>{@code /actuator/health} is always treated as public regardless of configuration, so

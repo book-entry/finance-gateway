@@ -39,8 +39,7 @@ import java.util.stream.Collectors;
  *   <li><b>Public path</b> (matches {@link GatewayAuthProperties#getPublicPaths()} or is
  *       {@code /actuator/health}) — filter is fully bypassed. Authorization header passes
  *       through untouched; no identity headers are injected. Use this for pre-token endpoints
- *       (login, register, OTP) and for endpoints that do their own Bearer validation
- *       downstream (e.g. {@code /authentication/v1/password/update-request}).</li>
+ *       (the Google / Apple OAuth login exchange).</li>
  *
  *   <li><b>Protected path with valid Bearer token</b> — token is validated by Firebase. The
  *       Authorization header is <em>stripped</em> and the gateway-signed envelope is injected:
