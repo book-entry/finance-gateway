@@ -12,9 +12,8 @@ spring:
         enabled: false
       routes:
         # Auth service exposes itself under context-path /authentication (server.servlet.context-path),
-        # so the full path /authentication/v1/login etc. is forwarded as-is. No RemoveRequestHeader here:
-        # /authentication/v1/password/update-request still needs the original Bearer token because the
-        # service revalidates it via FirebaseAuth.verifyIdToken inside PasswordServiceImpl.
+        # so the full path /authentication/v1/login etc. is forwarded as-is. The OAuth login exchange
+        # is a public path (no Authorization needed); /authentication/v1/me is gateway-protected.
         - id: authentication-service
           uri: ${AUTHENTICATION_SERVICE_URL}
           predicates:
@@ -63,12 +62,7 @@ finance:
     # On bypassed paths the Authorization header is forwarded as-is and no X-Internal-Secret
     # is injected (the downstream service is on its own).
     public-paths:
-      - /authentication/v1/login/** # pre-token: email/password, OTP request, OAuth exchange
-      - /authentication/v1/register/** # pre-token: registration + verify-otp
-      - /authentication/v1/otp/** # pre-token: OTP resend (token is in body, not header)
-      - /authentication/v1/password/** # mixed: update-request uses Firebase Bearer (revalidated
-        # by the auth service); update/reset-verify/reset use a
-        # short-lived JWT carried in the request body
+      - /authentication/v1/login/** # pre-token: OAuth (Google / Apple) ID-token exchange
     internal:
       # Shared secret forwarded to downstream services so they can trust X-User-Id.
       # Generate with: openssl rand -hex 32
