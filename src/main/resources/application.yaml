@@ -58,6 +58,11 @@ firebase:
 
 finance:
   gateway:
+    # Browser origins allowed to call the gateway cross-origin (comma-separated).
+    # Set to the SPA's origin(s) in production, e.g. https://book-entry.ansonwonggg.com.
+    # Leave empty for same-origin deployments (SPA reverse-proxied under the gateway).
+    cors:
+      allowed-origins: ${CORS_ALLOWED_ORIGINS:}
     # Ant-style patterns the FirebaseAuthFilter passes through WITHOUT validating a token.
     # On bypassed paths the Authorization header is forwarded as-is and no X-Internal-Secret
     # is injected (the downstream service is on its own).
